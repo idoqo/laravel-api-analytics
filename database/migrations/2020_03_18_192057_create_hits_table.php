@@ -10,8 +10,9 @@ class CreateHitsTable extends Migration
     {
         Schema::create('hits', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('url');
-            $table->string('params')->default(null);
+            $table->string('path');
+            $table->string('method');
+            $table->string('query_params')->default(null);
             $table->string('request_ip');
             $table->string('response_code');
             $table->timestamps();
