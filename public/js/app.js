@@ -1983,36 +1983,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      endpointHits: [{
-        id: 1,
-        created_at: "2020-03-18 20:41:00",
-        path: "/api/recipes",
-        method: "POST",
-        request_ip: "127.0.0.1",
-        response_code: "400"
-      }, {
-        id: 2,
-        created_at: "2020-03-18 20:41:00",
-        path: "/api/recipes",
-        method: "POST",
-        request_ip: "127.0.0.1",
-        response_code: "201"
-      }, {
-        id: 3,
-        created_at: "2020-03-18 20:41:00",
-        path: "/api/recipes",
-        method: "POST",
-        request_ip: "127.0.0.1",
-        response_code: "500"
-      }, {
-        id: 4,
-        created_at: "2020-03-18 20:41:00",
-        path: "/api/recipes/1",
-        method: "GET",
-        request_ip: "127.0.0.1",
-        response_code: "200"
-      }]
+      endpointHits: []
     };
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    axios.defaults.headers.common['Content-type'] = "application/json";
+    axios.defaults.headers.common['Accept'] = "application/json";
+    axios.get('/api/hits').then(function (response) {
+      console.log(response.data);
+      response.data.forEach(function (data) {
+        _this.endpointHits.push({
+          id: data.id,
+          created_at: data.created_at,
+          path: data.path,
+          method: data.method,
+          request_ip: data.request_ip,
+          response_code: data.response_code
+        });
+      });
+    });
   }
 });
 
