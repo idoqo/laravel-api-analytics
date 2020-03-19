@@ -71,20 +71,21 @@
 </style>
 
 <script>
+    import SyncClient from 'twilio-sync';
     export default
     {
+        props: ['token'],
+
         data() {
             return {
                 endpointHits: []
             }
         },
 
-        mounted() {
+        created() {
             axios.defaults.headers.common['Content-type'] = "application/json";
             axios.defaults.headers.common['Accept'] = "application/json";
-
             axios.get('/api/hits').then(response => {
-                console.log(response.data)
                 response.data.forEach((data) => {
                     this.endpointHits.push({
                         id: data.id,
@@ -95,6 +96,23 @@
                         response_code: data.response_code
                     })
                 });
+            })
+        },
+
+        mounted() {
+            let token = this.token;
+            let syncClient = new SyncClient(token);
+
+            syncClient.on('connectionStateChanged', (state) => {
+                if (state === 'connected') {
+                    syncClient.stream('api_calls').then((stream) => {
+                        stream.on('messagePublished', (args) => {
+                            console.log(args.message.payload);
+                            let hit = args.message.payload.hit.original.data;
+                            this.endpointHits.push(hit)
+                        })
+                    })
+                }
             })
         }
     }

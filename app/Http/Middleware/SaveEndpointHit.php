@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Events\ApiHit;
 use App\Hit;
 use Closure;
 use Illuminate\Support\Facades\Log;
@@ -24,13 +25,14 @@ class SaveEndpointHit
         $params = json_encode($request->query());
         $code = $response->status();
 
-        Hit::create([
+        $hit = new Hit([
             'path' => $path,
             'method' => $method,
             'query_params' => $params,
             'request_ip' => $ip,
             'response_code' => $code
         ]);
+        $hit->save();
 
         return $response;
     }

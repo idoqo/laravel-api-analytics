@@ -10,7 +10,7 @@
 </head>
 <body>
 <div id="app">
-    <dashboard-component></dashboard-component>
+    <dashboard-component :token="'{{ $token }}'"></dashboard-component>
 </div>
 <script src="{{mix('js/app.js')}}"></script>
 </body>
