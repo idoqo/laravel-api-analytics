@@ -78,42 +78,38 @@
 
         data() {
             return {
-                endpointHits: []
+                endpointHits: [],
+            }
+        },
+
+        methods: {
+            updateHitsList(items) {
+                items.map((item) => {
+                    this.endpointHits.push(item.data.value);
+                })
             }
         },
 
         created() {
-            axios.defaults.headers.common['Content-type'] = "application/json";
-            axios.defaults.headers.common['Accept'] = "application/json";
-            axios.get('/api/hits').then(response => {
-                response.data.forEach((data) => {
-                    this.endpointHits.push({
-                        id: data.id,
-                        created_at: data.created_at,
-                        path: data.path,
-                        method: data.method,
-                        request_ip: data.request_ip,
-                        response_code: data.response_code
-                    })
-                });
-            })
-        },
-
-        mounted() {
             let token = this.token;
-            let syncClient = new SyncClient(token);
+            let syncClient = new SyncClient(token, {logLevel: 'info'});
 
             syncClient.on('connectionStateChanged', (state) => {
-                if (state === 'connected') {
-                    syncClient.stream('api_calls').then((stream) => {
-                        stream.on('messagePublished', (args) => {
-                            console.log(args.message.payload);
-                            let hit = args.message.payload.hit.original.data;
-                            this.endpointHits.push(hit)
-                        })
-                    })
+                if (state !== 'connected') {
+                    console.log("Sync not connected");
                 }
-            })
-        }
+            });
+
+            syncClient.list("api_calls").then((syncList) => {
+                syncList.getItems().then(endpointHits => {
+                    console.log(endpointHits);
+                    this.updateHitsList(endpointHits.items);
+                });
+
+                syncList.on("itemAdded", (args) => {
+                    this.endpointHits.unshift(args.item.data.value);
+                });
+            });
+        },
     }
 </script>

@@ -6,6 +6,7 @@ use App\Events\ApiHit;
 use App\Hit;
 use Closure;
 use Illuminate\Support\Facades\Log;
+use Twilio\Rest\Client;
 
 class SaveEndpointHit
 {
@@ -33,7 +34,16 @@ class SaveEndpointHit
             'response_code' => $code
         ]);
         $hit->save();
+        $this->updateSyncList($hit);
 
         return $response;
+    }
+
+    private function updateSyncList(Hit $hit) {
+        $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+        $serviceSID = env('TWILIO_SYNC_SERVICE_SID');
+        $syncList = $client->sync->v1->services($serviceSID)->syncLists("api_calls");
+        $sid = $syncList->syncListItems->create($hit->toArray());
+        Log::debug($sid);
     }
 }
