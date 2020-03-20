@@ -11,20 +11,6 @@ class DashboardController extends Controller
     const UNIQUE_NAME_EXISTS = "[HTTP 409] Unable to create record: Unique name already exists";
 
     public function showDashboard() {
-        // prepare our Twilio sync document
-        $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
-        $hits = Hit::orderBy("created_at", "desc")->get();
-        $serviceSID = env('TWILIO_SYNC_SERVICE_SID');
-
-        // delete any existing list with same SID and re-populate it
-        $client->sync->v1->services($serviceSID)->syncLists("api_calls")->delete();
-        $syncList = $client->sync->v1->services($serviceSID)->syncLists->create([
-            "uniqueName" => "api_calls"
-        ]);
-        foreach ($hits as $hit) {
-            $syncList->syncListItems->create($hit->toArray());
-        }
-
         $data = [
             'token' => $this->getToken()
         ];
