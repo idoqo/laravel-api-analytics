@@ -2,8 +2,10 @@
 
 namespace App\Exceptions;
 
+use App\Hit;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Twilio\Rest\Client;
 
 class Handler extends ExceptionHandler
 {
@@ -50,6 +52,23 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        return parent::render($request, $exception);
+        $response = parent::render($request, $exception);
+        $this->logError($request, $response);
+        return $response;
+    }
+
+    private function logError($request, $response) {
+        $hit = new Hit([
+            'path' => $request->path(),
+            'method' => $request->method(),
+            'query_params' => json_encode($request->query()),
+            'request_ip' => $request->ip(),
+            'response_code' => $response->status()
+        ]);
+        $hit->save();
+        $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
+        $serviceSID = env('TWILIO_SYNC_SERVICE_SID');
+        $syncList = $client->sync->v1->services($serviceSID)->syncLists("api_calls");
+        $syncList->syncListItems->create($hit->toArray());
     }
 }
