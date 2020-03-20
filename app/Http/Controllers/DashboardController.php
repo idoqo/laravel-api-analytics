@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $data = [
             'token' => $this->getToken()
         ];
-        return view('dashboard', $data);
+        return view('welcome', $data);
     }
 
     private function getToken() {

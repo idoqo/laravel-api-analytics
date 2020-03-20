@@ -106,6 +106,7 @@
                     this.updateHitsList(endpointHits.items);
                 });
 
+                // this is called when new item is added to our list (whether remotely or locally)
                 syncList.on("itemAdded", (args) => {
                     this.endpointHits.unshift(args.item.data.value);
                 });
