@@ -8,8 +8,6 @@ use Twilio\Rest\Client;
 
 class DashboardController extends Controller
 {
-    const UNIQUE_NAME_EXISTS = "[HTTP 409] Unable to create record: Unique name already exists";
-
     public function showDashboard() {
         $data = [
             'token' => $this->getToken()
